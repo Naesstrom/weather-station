@@ -2,6 +2,7 @@
 import interrupt_client, MCP342X, wind_direction, HTU21D, bmp085, tgs2600, ds18b20_therm
 import database # requires MySQLdb python 2 library which is not ported to python 3 yet
 import os
+import paho.mqtt.client as mqtt 
 
 FALSE=0
 
@@ -26,6 +27,23 @@ db = database.weather_database() #Local MySQL db
 wind_average = wind_dir.get_value(10) #ten seconds
 
 print (humidity.read_temperature(), temp_probe.read_temp(), air_qual.get_value(), pressure.get_pressure(), humidity.read_humidity(), wind_average, interrupts.get_wind(), interrupts.get_wind_gust(), interrupts.get_rain())
+
+mqClient = mqtt.Client("weather")
+broker = "10.1.1.11"
+port = 1883
+topicPrefix = "beaufort/"
+
+mqClient.connect(broker, port, 60)
+mqClient.publish(topicPrefix+"out/humidity", str(round(humidity.read_temperature(),2)))
+mqClient.publish(topicPrefix+"out/temp_probe", str(round(temp_probe.read_temp(),2)))
+mqClient.publish(topicPrefix+"out/air_qual", str(round(air_qual.get_value(),2)))
+mqClient.publish(topicPrefix+"out/pressure", str(round(pressure.get_pressure(),2)))
+mqClient.publish(topicPrefix+"out/humidity", str(round(humidity.read_humidity(),2)))
+mqClient.publish(topicPrefix+"out/wind_average", str(round(wind_average,2)))
+mqClient.publish(topicPrefix+"out/wind", str(round(interrupts.get_wind(),2)))
+mqClient.publish(topicPrefix+"out/wind_gust", str(round(interrupts.get_wind_gust(),2)))
+mqClient.publish(topicPrefix+"out/rain", str(round(interrupts.get_rain(),2)))
+mqClient.disconnect()
 
 try:
     print("Inserting...")
