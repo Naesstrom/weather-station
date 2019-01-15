@@ -31,6 +31,8 @@ print (humidity.read_temperature(), temp_probe.read_temp(), air_qual.get_value()
 mqClient = mqtt.Client("weather")
 broker = "10.1.1.11"
 port = 1883
+# uncomment the below line and add your username and password if the broker needs it
+#username_pw_set(username, password=None)
 topicPrefix = "beaufort/"
 
 mqClient.connect(broker, port, 60)
